@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
 function colorEstado(status) {
@@ -12,6 +13,14 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // El layout de /dashboard ya redirige a /login si no hay sesión, pero
+  // Next.js puede empezar a renderizar esta página en paralelo antes de que
+  // ese redirect se resuelva del todo — así que comprobamos otra vez aquí
+  // para no romper con un usuario nulo en ese instante.
+  if (!user) {
+    redirect("/login");
+  }
 
   // Gracias a la política RLS "budgets: mechanic select own", esta consulta
   // ya solo puede devolver presupuestos de este mecánico aunque no filtrásemos

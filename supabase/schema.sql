@@ -139,3 +139,82 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- 7. Acceso público controlado (pantalla del cliente, sin login)
+--
+-- budgets/budget_items solo son legibles por su mecánico dueño (RLS arriba).
+-- Para que el cliente vea SU presupuesto sin login, usamos funciones
+-- `security definer`: se ejecutan con permisos elevados (las crea el dueño
+-- del proyecto, que sí puede saltarse RLS), pero cada función solo devuelve
+-- o modifica la fila cuyo public_token coincide exactamente con el que
+-- llega por parámetro. El cliente nunca puede listar ni tocar otra fila.
+
+create or replace function public.get_public_budget(p_token uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select jsonb_build_object(
+    'cliente_nombre', b.cliente_nombre,
+    'vehiculo_marca', b.vehiculo_marca,
+    'vehiculo_modelo', b.vehiculo_modelo,
+    'vehiculo_matricula', b.vehiculo_matricula,
+    'foto_url', b.foto_url,
+    'notas', b.notas,
+    'status', b.status,
+    'created_at', b.created_at,
+    'decided_at', b.decided_at,
+    'nombre_taller', p.nombre_taller,
+    'items', coalesce(
+      (select jsonb_agg(
+          jsonb_build_object(
+            'id', i.id,
+            'descripcion', i.descripcion,
+            'cantidad', i.cantidad,
+            'precio_unitario', i.precio_unitario
+          ) order by i.orden
+        )
+       from budget_items i
+       where i.budget_id = b.id),
+      '[]'::jsonb
+    )
+  )
+  from budgets b
+  join profiles p on p.id = b.mechanic_id
+  where b.public_token = p_token;
+$$;
+
+grant execute on function public.get_public_budget(uuid) to anon, authenticated;
+
+create or replace function public.respond_public_budget(p_token uuid, p_decision text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status budget_status;
+begin
+  if p_decision not in ('aprobado', 'rechazado') then
+    raise exception 'Decisión inválida';
+  end if;
+
+  -- El "where status = 'pendiente'" es lo que evita que alguien reenvíe la
+  -- petición y cambie de aprobado a rechazado (o al revés) después de decidir.
+  update budgets
+    set status = p_decision::budget_status,
+        decided_at = now()
+    where public_token = p_token
+      and status = 'pendiente'
+    returning status into v_status;
+
+  if v_status is null then
+    return jsonb_build_object('ok', false);
+  end if;
+
+  return jsonb_build_object('ok', true, 'status', v_status);
+end;
+$$;
+
+grant execute on function public.respond_public_budget(uuid, text) to anon, authenticated;

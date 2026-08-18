@@ -1,8 +1,16 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import Compartir from "./compartir";
 
 function euros(numero) {
   return Number(numero).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+}
+
+function colorEstado(status) {
+  if (status === "aprobado") return "bg-green-100 text-green-800";
+  if (status === "rechazado") return "bg-red-100 text-red-800";
+  return "bg-yellow-100 text-yellow-800";
 }
 
 export default async function DetallePresupuestoPage({ params }) {
@@ -25,15 +33,28 @@ export default async function DetallePresupuestoPage({ params }) {
     0
   );
 
+  const headerList = await headers();
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    `${headerList.get("x-forwarded-proto") || "http"}://${headerList.get("host")}`;
+  const urlPublica = `${origin}/p/${budget.public_token}`;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">{budget.cliente_nombre}</h1>
-        <p className="text-sm text-gray-500">
-          {[budget.vehiculo_marca, budget.vehiculo_modelo, budget.vehiculo_matricula]
-            .filter(Boolean)
-            .join(" · ") || "Sin datos de vehículo"}
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">{budget.cliente_nombre}</h1>
+          <p className="text-sm text-gray-500">
+            {[budget.vehiculo_marca, budget.vehiculo_modelo, budget.vehiculo_matricula]
+              .filter(Boolean)
+              .join(" · ") || "Sin datos de vehículo"}
+          </p>
+        </div>
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${colorEstado(budget.status)}`}
+        >
+          {budget.status}
+        </span>
       </div>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -74,14 +95,15 @@ export default async function DetallePresupuestoPage({ params }) {
         </section>
       )}
 
-      <section className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-500">
-        <p className="font-medium text-gray-700">Enlace público para el cliente</p>
-        <p className="mt-1 break-all font-mono text-xs">
-          /p/{budget.public_token}
+      <section className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+        <p className="mb-2 text-sm font-medium text-gray-700">
+          Enlace público para el cliente
         </p>
-        <p className="mt-2">
-          🔜 Todavía no existe esa pantalla — la construimos en el siguiente paso.
-        </p>
+        <Compartir
+          url={urlPublica}
+          clienteNombre={budget.cliente_nombre}
+          clienteTelefono={budget.cliente_telefono}
+        />
       </section>
     </div>
   );
