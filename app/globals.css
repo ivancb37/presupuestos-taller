@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Las tarjetas de los formularios (bg-white) son blancas siempre, sin
+   importar si el móvil está en modo oscuro. Sin esto, los campos heredan
+   --foreground (casi blanco en modo oscuro) y el texto se vuelve invisible
+   sobre el fondo blanco de la tarjeta. Fijamos un color legible siempre. */
+input,
+textarea,
+select {
+  color: #111827;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
