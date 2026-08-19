@@ -32,14 +32,24 @@ export async function eliminarPresupuesto(id) {
   }
 
   // budget_items se borra solo por el "on delete cascade" de la tabla.
-  const { error } = await supabase
+  // Pedimos .select() para saber cuántas filas se borraron de verdad: si
+  // falta una política RLS de DELETE, Supabase no da error pero tampoco
+  // borra nada — sin este chequeo, ese fallo pasaría desapercibido.
+  const { data: borrados, error } = await supabase
     .from("budgets")
     .delete()
     .eq("id", id)
-    .eq("mechanic_id", user.id);
+    .eq("mechanic_id", user.id)
+    .select("id");
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (!borrados || borrados.length === 0) {
+    return {
+      error: "No se pudo eliminar (0 filas afectadas). Revisa los permisos en Supabase.",
+    };
   }
 
   if (budget.foto_url) {

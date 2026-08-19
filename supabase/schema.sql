@@ -78,6 +78,10 @@ create policy "budgets: mechanic update own"
   on budgets for update
   using (auth.uid() = mechanic_id);
 
+create policy "budgets: mechanic delete own"
+  on budgets for delete
+  using (auth.uid() = mechanic_id);
+
 -- Nota: NO añadimos aquí ninguna política de "lectura pública", porque una política
 -- RLS no puede condicionarse al valor que el cliente escriba en su propia consulta
 -- (eso sería confiar en el cliente). El acceso del cliente sin login al presupuesto
