@@ -16,8 +16,8 @@ export default async function LoginPage({ searchParams }) {
   const mensaje = params?.mensaje;
 
   return (
-    <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-slate-900 md:flex md:flex-col md:justify-between md:p-12">
+    <main className="flex min-h-screen flex-col md:grid md:grid-cols-2">
+      <div className="relative flex flex-col gap-8 overflow-hidden bg-slate-900 px-6 py-10 md:justify-between md:p-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
@@ -32,13 +32,13 @@ export default async function LoginPage({ searchParams }) {
           Presupuestos de Taller
         </div>
 
-        <div className="relative space-y-6">
-          <h1 className="font-display text-4xl font-semibold leading-tight text-white">
+        <div className="relative space-y-5 md:space-y-6">
+          <h1 className="font-display text-2xl font-semibold leading-tight text-white md:text-4xl">
             Presupuestos claros,
             <br />
             aprobados en un click.
           </h1>
-          <ul className="space-y-3">
+          <ul className="space-y-2.5 md:space-y-3">
             {puntos.map((punto) => (
               <li key={punto} className="flex items-start gap-3 text-slate-300">
                 <svg
@@ -60,20 +60,13 @@ export default async function LoginPage({ searchParams }) {
           </ul>
         </div>
 
-        <p className="relative text-xs text-slate-500">
+        <p className="relative hidden text-xs text-slate-500 md:block">
           © {new Date().getFullYear()} Presupuestos de Taller
         </p>
       </div>
 
-      <div className="flex items-center justify-center bg-slate-50 px-4 py-12">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="flex items-center gap-2 font-display text-xl font-semibold text-slate-900 md:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-base">
-              🔧
-            </span>
-            Presupuestos de Taller
-          </div>
-
+      <div className="flex-1 bg-slate-50 px-4 py-8 md:flex md:items-center md:justify-center md:py-10">
+        <div className="mx-auto w-full max-w-sm">
           <AuthCard error={error} mensaje={mensaje} />
         </div>
       </div>
