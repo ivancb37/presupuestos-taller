@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
 // Extrae la ruta dentro del bucket a partir de la URL pública, para poder
@@ -39,8 +40,10 @@ export async function actualizarPresupuesto(id, datos) {
     return { error: "Añade al menos un concepto con descripción y precio." };
   }
 
-  // Solo se puede editar mientras el cliente no haya decidido — si ya
-  // aprobó o rechazó, el contenido que vio debe quedar fijo como registro.
+  // Se puede editar en cualquier estado (p. ej. corregir un teléfono o una
+  // matrícula mal escritos incluso después de que el cliente ya respondió).
+  // Ojo: si cambias los conceptos/precios de un presupuesto ya aprobado, el
+  // cliente NO vuelve a ver ni a confirmar esos cambios automáticamente.
   const { data: actual } = await supabase
     .from("budgets")
     .select("status, foto_url")
@@ -50,9 +53,6 @@ export async function actualizarPresupuesto(id, datos) {
 
   if (!actual) {
     return { error: "Presupuesto no encontrado." };
-  }
-  if (actual.status !== "pendiente") {
-    return { error: "Ya no se puede editar: el cliente ya respondió a este presupuesto." };
   }
 
   const cambios = {
@@ -107,5 +107,7 @@ export async function actualizarPresupuesto(id, datos) {
     return { error: itemsError.message };
   }
 
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/presupuestos/${id}`);
   redirect(`/dashboard/presupuestos/${id}`);
 }

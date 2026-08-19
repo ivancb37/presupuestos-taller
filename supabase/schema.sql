@@ -254,3 +254,14 @@ create policy "vehiculo-fotos: mechanic delete own folder"
     bucket_id = 'vehiculo-fotos'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- 9. Trabajo terminado
+--
+-- `status` (pendiente/aprobado/rechazado) es la DECISIÓN DEL CLIENTE, y la
+-- pone la pantalla pública — no la toca el mecánico directamente. Esta
+-- columna nueva es distinta: es el propio mecánico marcando que ya hizo
+-- el trabajo de un presupuesto aprobado. Solo tiene sentido cuando
+-- status = 'aprobado'; se usa para separar "aprobado, en curso" de
+-- "aprobado y ya entregado" en el panel del mecánico.
+alter table budgets
+  add column trabajo_terminado boolean not null default false;

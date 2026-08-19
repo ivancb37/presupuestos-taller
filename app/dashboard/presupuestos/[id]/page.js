@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import Compartir from "./compartir";
 import AccionesPresupuesto from "./acciones";
+import MarcarTerminado from "./marcar-terminado";
 
 function euros(numero) {
   return Number(numero).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
@@ -54,9 +55,15 @@ export default async function DetallePresupuestoPage({ params }) {
         <span
           className={`rounded-full px-2 py-1 text-xs font-medium ${colorEstado(budget.status)}`}
         >
-          {budget.status}
+          {budget.status === "aprobado" && budget.trabajo_terminado
+            ? "terminado"
+            : budget.status}
         </span>
       </div>
+
+      {budget.status === "aprobado" && (
+        <MarcarTerminado id={budget.id} terminado={budget.trabajo_terminado} />
+      )}
 
       {budget.foto_url && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -116,7 +123,7 @@ export default async function DetallePresupuestoPage({ params }) {
         />
       </section>
 
-      <AccionesPresupuesto id={budget.id} esPendiente={budget.status === "pendiente"} />
+      <AccionesPresupuesto id={budget.id} />
     </div>
   );
 }

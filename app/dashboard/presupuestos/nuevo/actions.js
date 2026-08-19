@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
 // A diferencia de login/signup (que se llaman como formAction={..} desde un
@@ -65,5 +66,6 @@ export async function crearPresupuesto(datos) {
     return { error: itemsError.message };
   }
 
+  revalidatePath("/dashboard");
   redirect(`/dashboard/presupuestos/${budget.id}`);
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
 function rutaDesdeUrlPublica(url) {
@@ -48,5 +49,34 @@ export async function eliminarPresupuesto(id) {
     }
   }
 
+  // Sin esto, /dashboard puede servirse desde la caché del navegador (Router
+  // Cache de Next.js) y seguir mostrando el presupuesto que acabamos de
+  // borrar hasta que esa caché expire por su cuenta.
+  revalidatePath("/dashboard");
   redirect("/dashboard");
+}
+
+export async function marcarTerminado(id, terminado) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase
+    .from("budgets")
+    .update({ trabajo_terminado: terminado })
+    .eq("id", id)
+    .eq("mechanic_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/presupuestos/${id}`);
+  return { ok: true };
 }
