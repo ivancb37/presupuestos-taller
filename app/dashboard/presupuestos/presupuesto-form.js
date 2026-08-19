@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { crearPresupuesto } from "./actions";
 import { createClient } from "@/utils/supabase/client";
 
 const conceptoVacio = () => ({ descripcion: "", cantidad: "1", precio_unitario: "" });
@@ -10,18 +9,31 @@ function euros(numero) {
   return numero.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
 
-export default function NuevoPresupuestoForm() {
+// Formulario compartido entre "crear presupuesto nuevo" y "editar uno
+// existente". `accion` es la Server Action a llamar al guardar (recibe el
+// objeto con los datos del formulario); `valoresIniciales` precarga los
+// campos cuando se usa para editar.
+export default function PresupuestoForm({ accion, valoresIniciales, textoBoton = "Guardar presupuesto" }) {
   const [cliente, setCliente] = useState({
-    cliente_nombre: "",
-    cliente_telefono: "",
-    vehiculo_marca: "",
-    vehiculo_modelo: "",
-    vehiculo_matricula: "",
-    notas: "",
+    cliente_nombre: valoresIniciales?.cliente_nombre || "",
+    cliente_telefono: valoresIniciales?.cliente_telefono || "",
+    vehiculo_marca: valoresIniciales?.vehiculo_marca || "",
+    vehiculo_modelo: valoresIniciales?.vehiculo_modelo || "",
+    vehiculo_matricula: valoresIniciales?.vehiculo_matricula || "",
+    notas: valoresIniciales?.notas || "",
   });
-  const [items, setItems] = useState([conceptoVacio()]);
+  const [items, setItems] = useState(
+    valoresIniciales?.items?.length
+      ? valoresIniciales.items.map((i) => ({
+          descripcion: i.descripcion,
+          cantidad: String(i.cantidad),
+          precio_unitario: String(i.precio_unitario),
+        }))
+      : [conceptoVacio()]
+  );
   const [foto, setFoto] = useState(null);
-  const [fotoPreview, setFotoPreview] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(valoresIniciales?.foto_url || null);
+  const [fotoEliminada, setFotoEliminada] = useState(false);
   const [error, setError] = useState(null);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -53,24 +65,22 @@ export default function NuevoPresupuestoForm() {
     const file = e.target.files?.[0];
     if (!file) return;
     setFoto(file);
+    setFotoEliminada(false);
     setFotoPreview((prevUrl) => {
-      if (prevUrl) URL.revokeObjectURL(prevUrl);
+      if (prevUrl && prevUrl.startsWith("blob:")) URL.revokeObjectURL(prevUrl);
       return URL.createObjectURL(file);
     });
   }
 
   function quitarFoto() {
     setFotoPreview((prevUrl) => {
-      if (prevUrl) URL.revokeObjectURL(prevUrl);
+      if (prevUrl && prevUrl.startsWith("blob:")) URL.revokeObjectURL(prevUrl);
       return null;
     });
     setFoto(null);
+    setFotoEliminada(true);
   }
 
-  // Sube el archivo directamente desde el navegador a Supabase Storage
-  // (sin pasar por nuestro servidor) y devuelve la URL pública resultante.
-  // La carpeta usa el id del mecánico porque así lo exige la política RLS
-  // del bucket: solo puedes escribir dentro de tu propia carpeta.
   async function subirFoto(supabase, userId) {
     const extension = foto.name.split(".").pop();
     const ruta = `${userId}/${crypto.randomUUID()}.${extension}`;
@@ -91,7 +101,9 @@ export default function NuevoPresupuestoForm() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      let foto_url = null;
+      // foto_url: string nueva si se subió una foto distinta, null si se
+      // quitó explícitamente, undefined si no se tocó (mantener la actual).
+      let foto_url = fotoEliminada ? null : undefined;
 
       if (foto) {
         setSubiendoFoto(true);
@@ -114,7 +126,7 @@ export default function NuevoPresupuestoForm() {
         setSubiendoFoto(false);
       }
 
-      const resultado = await crearPresupuesto({ ...cliente, items, foto_url });
+      const resultado = await accion({ ...cliente, items, foto_url });
       if (resultado?.error) {
         setError(resultado.error);
       }
@@ -301,7 +313,7 @@ export default function NuevoPresupuestoForm() {
         disabled={isPending}
         className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {subiendoFoto ? "Subiendo foto..." : isPending ? "Guardando..." : "Guardar presupuesto"}
+        {subiendoFoto ? "Subiendo foto..." : isPending ? "Guardando..." : textoBoton}
       </button>
     </form>
   );

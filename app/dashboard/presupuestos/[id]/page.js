@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import Compartir from "./compartir";
+import AccionesPresupuesto from "./acciones";
 
 function euros(numero) {
   return Number(numero).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
@@ -114,6 +115,8 @@ export default async function DetallePresupuestoPage({ params }) {
           clienteTelefono={budget.cliente_telefono}
         />
       </section>
+
+      <AccionesPresupuesto id={budget.id} esPendiente={budget.status === "pendiente"} />
     </div>
   );
 }
