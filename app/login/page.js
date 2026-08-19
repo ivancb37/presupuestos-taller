@@ -16,8 +16,8 @@ export default async function LoginPage({ searchParams }) {
   const mensaje = params?.mensaje;
 
   return (
-    <main className="flex min-h-screen flex-col md:grid md:grid-cols-2">
-      <div className="relative flex flex-col gap-8 overflow-hidden bg-slate-900 px-6 py-10 md:justify-between md:p-12">
+    <main className="flex min-h-screen flex-col bg-slate-900 md:grid md:grid-cols-2">
+      <div className="relative flex flex-col gap-8 overflow-hidden px-6 pb-16 pt-10 md:justify-between md:bg-slate-900 md:p-12 md:pb-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
@@ -65,7 +65,11 @@ export default async function LoginPage({ searchParams }) {
         </p>
       </div>
 
-      <div className="flex-1 bg-slate-50 px-4 py-8 md:flex md:items-center md:justify-center md:py-10">
+      {/* En móvil esto se dibuja como una "hoja" redondeada que sube por
+         encima del panel oscuro (margen negativo + esquinas redondeadas),
+         para que no haya un corte recto entre las dos zonas. En escritorio
+         vuelve a ser una columna normal, ya separada por el grid. */}
+      <div className="relative -mt-8 flex-1 rounded-t-[2rem] bg-slate-50 px-5 pb-12 pt-8 shadow-[0_-12px_30px_-10px_rgba(0,0,0,0.35)] md:mt-0 md:flex md:items-center md:justify-center md:rounded-none md:p-10 md:shadow-none">
         <div className="mx-auto w-full max-w-sm">
           <AuthCard error={error} mensaje={mensaje} />
         </div>
