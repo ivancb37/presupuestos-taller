@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { login, signup } from "./actions";
 
 // Server Component: se renderiza en el servidor, puede leer los parámetros
@@ -50,6 +51,11 @@ export default async function LoginPage({ searchParams }) {
               Entrar
             </button>
           </form>
+          <p className="text-right text-sm">
+            <Link href="/recuperar" className="text-blue-600 hover:text-blue-800">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
         </section>
 
         <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
