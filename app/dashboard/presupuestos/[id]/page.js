@@ -57,6 +57,15 @@ export default async function DetallePresupuestoPage({ params }) {
         </span>
       </div>
 
+      {budget.foto_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={budget.foto_url}
+          alt="Foto del vehículo"
+          className="max-h-64 w-full rounded-lg border border-gray-200 object-cover"
+        />
+      )}
+
       <section className="rounded-lg border border-gray-200 bg-white p-5">
         <table className="w-full text-sm">
           <thead>

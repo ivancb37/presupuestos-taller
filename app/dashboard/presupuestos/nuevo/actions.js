@@ -45,6 +45,7 @@ export async function crearPresupuesto(datos) {
       vehiculo_modelo: datos.vehiculo_modelo?.trim() || null,
       vehiculo_matricula: datos.vehiculo_matricula?.trim() || null,
       notas: datos.notas?.trim() || null,
+      foto_url: datos.foto_url || null,
     })
     .select("id")
     .single();

@@ -218,3 +218,39 @@ end;
 $$;
 
 grant execute on function public.respond_public_budget(uuid, text) to anon, authenticated;
+
+-- 8. Storage para la foto del vehículo
+--
+-- Bucket público: cualquiera con la URL puede VER una foto (el cliente la
+-- necesita ver sin login), pero solo un mecánico autenticado puede SUBIR
+-- una foto, y solo dentro de su propia carpeta (la primera parte de la
+-- ruta del archivo debe ser su propio user id) — así un mecánico no puede
+-- sobrescribir ni borrar fotos de otro mecánico.
+
+insert into storage.buckets (id, name, public)
+values ('vehiculo-fotos', 'vehiculo-fotos', true)
+on conflict (id) do nothing;
+
+create policy "vehiculo-fotos: mechanic insert own folder"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'vehiculo-fotos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "vehiculo-fotos: mechanic update own folder"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'vehiculo-fotos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "vehiculo-fotos: mechanic delete own folder"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'vehiculo-fotos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );

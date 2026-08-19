@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { crearPresupuesto } from "./actions";
+import { createClient } from "@/utils/supabase/client";
 
 const conceptoVacio = () => ({ descripcion: "", cantidad: "1", precio_unitario: "" });
 
@@ -19,7 +20,10 @@ export default function NuevoPresupuestoForm() {
     notas: "",
   });
   const [items, setItems] = useState([conceptoVacio()]);
+  const [foto, setFoto] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
   const [error, setError] = useState(null);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const total = items.reduce(
@@ -45,11 +49,72 @@ export default function NuevoPresupuestoForm() {
     setItems((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
   }
 
+  function elegirFoto(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFoto(file);
+    setFotoPreview((prevUrl) => {
+      if (prevUrl) URL.revokeObjectURL(prevUrl);
+      return URL.createObjectURL(file);
+    });
+  }
+
+  function quitarFoto() {
+    setFotoPreview((prevUrl) => {
+      if (prevUrl) URL.revokeObjectURL(prevUrl);
+      return null;
+    });
+    setFoto(null);
+  }
+
+  // Sube el archivo directamente desde el navegador a Supabase Storage
+  // (sin pasar por nuestro servidor) y devuelve la URL pública resultante.
+  // La carpeta usa el id del mecánico porque así lo exige la política RLS
+  // del bucket: solo puedes escribir dentro de tu propia carpeta.
+  async function subirFoto(supabase, userId) {
+    const extension = foto.name.split(".").pop();
+    const ruta = `${userId}/${crypto.randomUUID()}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("vehiculo-fotos")
+      .upload(ruta, foto);
+
+    if (uploadError) {
+      throw new Error(`No se pudo subir la foto: ${uploadError.message}`);
+    }
+
+    const { data } = supabase.storage.from("vehiculo-fotos").getPublicUrl(ruta);
+    return data.publicUrl;
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const resultado = await crearPresupuesto({ ...cliente, items });
+      let foto_url = null;
+
+      if (foto) {
+        setSubiendoFoto(true);
+        try {
+          const supabase = createClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            setError("Tu sesión ha caducado, vuelve a iniciar sesión.");
+            setSubiendoFoto(false);
+            return;
+          }
+          foto_url = await subirFoto(supabase, user.id);
+        } catch (err) {
+          setError(err.message);
+          setSubiendoFoto(false);
+          return;
+        }
+        setSubiendoFoto(false);
+      }
+
+      const resultado = await crearPresupuesto({ ...cliente, items, foto_url });
       if (resultado?.error) {
         setError(resultado.error);
       }
@@ -191,6 +256,35 @@ export default function NuevoPresupuestoForm() {
         </div>
       </section>
 
+      <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-5">
+        <h2 className="font-semibold text-gray-900">Foto del vehículo (opcional)</h2>
+
+        {fotoPreview ? (
+          <div className="space-y-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fotoPreview}
+              alt="Vista previa del vehículo"
+              className="max-h-48 w-full rounded-md border border-gray-200 object-cover"
+            />
+            <button
+              type="button"
+              onClick={quitarFoto}
+              className="text-sm text-red-600 hover:text-red-800"
+            >
+              Quitar foto
+            </button>
+          </div>
+        ) : (
+          <input
+            type="file"
+            accept="image/*"
+            onChange={elegirFoto}
+            className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+          />
+        )}
+      </section>
+
       <section className="space-y-2 rounded-lg border border-gray-200 bg-white p-5">
         <label className="block text-sm text-gray-700">Notas (opcional)</label>
         <textarea
@@ -207,7 +301,7 @@ export default function NuevoPresupuestoForm() {
         disabled={isPending}
         className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {isPending ? "Guardando..." : "Guardar presupuesto"}
+        {subiendoFoto ? "Subiendo foto..." : isPending ? "Guardando..." : "Guardar presupuesto"}
       </button>
     </form>
   );
