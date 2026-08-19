@@ -27,12 +27,14 @@ export default function AccionesPresupuesto({ id }) {
   return (
     <div className="space-y-2">
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-100">
+          {error}
+        </p>
       )}
-      <div className="flex gap-4 text-sm">
+      <div className="flex gap-2">
         <Link
           href={`/dashboard/presupuestos/${id}/editar`}
-          className="font-medium text-blue-600 hover:text-blue-800"
+          className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
         >
           Editar
         </Link>
@@ -40,7 +42,7 @@ export default function AccionesPresupuesto({ id }) {
           type="button"
           onClick={handleEliminar}
           disabled={isPending}
-          className="font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+          className="flex-1 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 shadow-sm transition-colors hover:bg-red-50 disabled:opacity-50"
         >
           {isPending ? "Eliminando..." : "Eliminar"}
         </button>

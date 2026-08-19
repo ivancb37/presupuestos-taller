@@ -5,6 +5,11 @@ import { createClient } from "@/utils/supabase/client";
 
 const conceptoVacio = () => ({ descripcion: "", cantidad: "1", precio_unitario: "" });
 
+const inputClass =
+  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15";
+const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
+const cardClass = "space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60";
+
 function euros(numero) {
   return numero.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
@@ -134,75 +139,73 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-red-100">
+          {error}
+        </p>
       )}
 
-      <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="font-semibold text-gray-900">Cliente y vehículo</h2>
+      <section className={cardClass}>
+        <h2 className="font-display font-semibold text-slate-900">Cliente y vehículo</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm text-gray-700">
-              Nombre del cliente *
-            </label>
+            <label className={labelClass}>Nombre del cliente *</label>
             <input
               required
               value={cliente.cliente_nombre}
               onChange={(e) => actualizarCliente("cliente_nombre", e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-gray-700">
-              Teléfono (para WhatsApp)
-            </label>
+            <label className={labelClass}>Teléfono (para WhatsApp)</label>
             <input
               type="tel"
               placeholder="+34 600 000 000"
               value={cliente.cliente_telefono}
               onChange={(e) => actualizarCliente("cliente_telefono", e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-gray-700">Marca</label>
+            <label className={labelClass}>Marca</label>
             <input
               value={cliente.vehiculo_marca}
               onChange={(e) => actualizarCliente("vehiculo_marca", e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-gray-700">Modelo</label>
+            <label className={labelClass}>Modelo</label>
             <input
               value={cliente.vehiculo_modelo}
               onChange={(e) => actualizarCliente("vehiculo_modelo", e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-gray-700">Matrícula</label>
+            <label className={labelClass}>Matrícula</label>
             <input
               value={cliente.vehiculo_matricula}
               onChange={(e) => actualizarCliente("vehiculo_matricula", e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className={inputClass}
             />
           </div>
         </div>
       </section>
 
-      <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="font-semibold text-gray-900">Conceptos</h2>
+      <section className={cardClass}>
+        <h2 className="font-display font-semibold text-slate-900">Conceptos</h2>
 
         <div className="space-y-3">
           {items.map((item, index) => (
             <div
               key={index}
-              className="grid grid-cols-1 gap-2 rounded-md border border-gray-100 p-3 sm:grid-cols-[1fr_5rem_7rem_auto] sm:items-end sm:border-0 sm:p-0"
+              className="grid grid-cols-1 gap-2 rounded-lg border border-slate-100 bg-slate-50/60 p-3 sm:grid-cols-[1fr_5rem_7rem_auto] sm:items-end sm:border-0 sm:bg-transparent sm:p-0"
             >
               <div>
-                <label className="mb-1 block text-xs text-gray-500 sm:hidden">
+                <label className="mb-1 block text-xs text-slate-500 sm:hidden">
                   Descripción
                 </label>
                 <input
@@ -210,11 +213,11 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
                   placeholder="Ej. Pastillas de freno delanteras"
                   value={item.descripcion}
                   onChange={(e) => actualizarItem(index, "descripcion", e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-gray-500 sm:hidden">
+                <label className="mb-1 block text-xs text-slate-500 sm:hidden">
                   Cantidad
                 </label>
                 <input
@@ -223,11 +226,11 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
                   step="0.5"
                   value={item.cantidad}
                   onChange={(e) => actualizarItem(index, "cantidad", e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-gray-500 sm:hidden">
+                <label className="mb-1 block text-xs text-slate-500 sm:hidden">
                   Precio/ud (€)
                 </label>
                 <input
@@ -239,16 +242,24 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
                   onChange={(e) =>
                     actualizarItem(index, "precio_unitario", e.target.value)
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className={inputClass}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => quitarConcepto(index)}
                 disabled={items.length === 1}
-                className="justify-self-start text-sm text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:text-gray-300 sm:justify-self-center"
+                aria-label="Quitar concepto"
+                className="justify-self-start rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-0 sm:justify-self-center"
               >
-                Quitar
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
             </div>
           ))}
@@ -257,19 +268,22 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
         <button
           type="button"
           onClick={añadirConcepto}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
         >
-          + Añadir concepto
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Añadir concepto
         </button>
 
-        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-          <span className="text-sm text-gray-500">Total</span>
-          <span className="text-lg font-bold text-gray-900">{euros(total)}</span>
+        <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+          <span className="text-sm font-medium text-slate-500">Total</span>
+          <span className="font-display text-xl font-semibold text-slate-900">{euros(total)}</span>
         </div>
       </section>
 
-      <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="font-semibold text-gray-900">Foto del vehículo (opcional)</h2>
+      <section className={cardClass}>
+        <h2 className="font-display font-semibold text-slate-900">Foto del vehículo (opcional)</h2>
 
         {fotoPreview ? (
           <div className="space-y-2">
@@ -277,41 +291,54 @@ export default function PresupuestoForm({ accion, valoresIniciales, textoBoton =
             <img
               src={fotoPreview}
               alt="Vista previa del vehículo"
-              className="max-h-48 w-full rounded-md border border-gray-200 object-cover"
+              className="max-h-48 w-full rounded-lg border border-slate-200 object-cover"
             />
             <button
               type="button"
               onClick={quitarFoto}
-              className="text-sm text-red-600 hover:text-red-800"
+              className="text-sm font-medium text-red-600 hover:text-red-700"
             >
               Quitar foto
             </button>
           </div>
         ) : (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={elegirFoto}
-            className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
-          />
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 px-4 py-8 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
+            <svg
+              className="h-7 w-7 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 8.25L12 3.75 7.5 8.25M12 3.75v13.5"
+              />
+            </svg>
+            <span className="text-sm text-slate-500">
+              <span className="font-semibold text-indigo-600">Sube una foto</span> del vehículo
+            </span>
+            <input type="file" accept="image/*" onChange={elegirFoto} className="hidden" />
+          </label>
         )}
       </section>
 
-      <section className="space-y-2 rounded-lg border border-gray-200 bg-white p-5">
-        <label className="block text-sm text-gray-700">Notas (opcional)</label>
+      <section className={cardClass}>
+        <label className={labelClass}>Notas (opcional)</label>
         <textarea
           rows={3}
           value={cliente.notas}
           onChange={(e) => actualizarCliente("notas", e.target.value)}
           placeholder="Ej. Se recomienda revisar también la correa de distribución"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className={inputClass}
         />
       </section>
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+        className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50"
       >
         {subiendoFoto ? "Subiendo foto..." : isPending ? "Guardando..." : textoBoton}
       </button>

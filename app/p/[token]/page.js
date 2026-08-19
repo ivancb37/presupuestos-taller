@@ -34,73 +34,85 @@ export default async function PresupuestoPublicoPage({ params }) {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-md space-y-5">
-        <div className="text-center">
-          <p className="text-sm text-gray-500">{budget.nombre_taller}</p>
-          <h1 className="text-lg font-bold text-gray-900">
+    <main className="min-h-screen bg-slate-100">
+      <div className="bg-slate-900 pb-14 pt-8">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-2 px-4 text-center">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-lg">
+            🔧
+          </span>
+          <p className="text-sm font-medium text-slate-300">{budget.nombre_taller}</p>
+          <h1 className="font-display text-xl font-semibold text-white">
             Presupuesto para {budget.cliente_nombre}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             {[budget.vehiculo_marca, budget.vehiculo_modelo, budget.vehiculo_matricula]
               .filter(Boolean)
               .join(" · ")}
           </p>
         </div>
+      </div>
 
+      <div className="mx-auto -mt-8 max-w-md space-y-5 px-4 pb-10">
         {budget.foto_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={budget.foto_url}
             alt="Foto del vehículo"
-            className="w-full rounded-lg border border-gray-200 object-cover"
+            className="w-full rounded-xl border border-white object-cover shadow-lg shadow-slate-900/10"
           />
         )}
 
-        <section className="rounded-lg border border-gray-200 bg-white p-4">
-          <ul className="divide-y divide-gray-100">
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
+          <ul className="divide-y divide-slate-100 px-4">
             {budget.items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between py-2 text-sm">
-                <div>
-                  <p className="text-gray-900">{item.descripcion}</p>
-                  <p className="text-gray-500">
+              <li key={item.id} className="flex items-center justify-between gap-3 py-3 text-sm">
+                <div className="min-w-0">
+                  <p className="text-slate-900">{item.descripcion}</p>
+                  <p className="text-slate-500">
                     {item.cantidad} × {euros(item.precio_unitario)}
                   </p>
                 </div>
-                <p className="font-medium text-gray-900">
+                <p className="shrink-0 font-medium text-slate-900">
                   {euros(item.cantidad * item.precio_unitario)}
                 </p>
               </li>
             ))}
           </ul>
-          <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-            <span className="font-medium text-gray-500">Total</span>
-            <span className="text-xl font-bold text-gray-900">{euros(total)}</span>
+          <div className="flex items-center justify-between bg-slate-900 px-4 py-4">
+            <span className="text-sm font-medium text-slate-300">Total</span>
+            <span className="font-display text-2xl font-semibold text-white">{euros(total)}</span>
           </div>
         </section>
 
         {budget.notas && (
-          <section className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="mb-1 text-sm font-medium text-gray-500">Notas del taller</h2>
-            <p className="text-sm text-gray-900">{budget.notas}</p>
+          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/5">
+            <h2 className="mb-1 text-sm font-medium text-slate-500">Notas del taller</h2>
+            <p className="text-sm text-slate-900">{budget.notas}</p>
           </section>
         )}
 
         {budget.status === "pendiente" ? (
           <ResponderForm token={token} />
         ) : (
-          <p
-            className={`rounded-md px-4 py-3 text-center text-sm font-medium ${
+          <div
+            className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium ring-1 ${
               budget.status === "aprobado"
-                ? "bg-green-50 text-green-800"
-                : "bg-red-50 text-red-800"
+                ? "bg-emerald-50 text-emerald-800 ring-emerald-100"
+                : "bg-red-50 text-red-800 ring-red-100"
             }`}
           >
-            {budget.status === "aprobado"
-              ? `✅ Aprobado el ${fecha(budget.decided_at)}.`
-              : `Rechazado el ${fecha(budget.decided_at)}.`}
-          </p>
+            <span className="text-lg">{budget.status === "aprobado" ? "✅" : "✕"}</span>
+            <span>
+              {budget.status === "aprobado"
+                ? `Aprobado el ${fecha(budget.decided_at)}.`
+                : `Rechazado el ${fecha(budget.decided_at)}.`}
+            </span>
+          </div>
         )}
+
+        <p className="pt-2 text-center text-xs text-slate-400">
+          Presupuesto generado con Presupuestos de Taller
+        </p>
       </div>
     </main>
   );

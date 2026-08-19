@@ -23,18 +23,28 @@ export default async function DashboardLayout({ children }) {
     .eq("id", user.id)
     .single();
 
+  const inicial = (profile?.nombre_taller || "T").trim().charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link href="/dashboard" className="font-semibold text-gray-900">
+          <Link href="/dashboard" className="flex items-center gap-2 font-display font-semibold text-slate-900">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm">
+              🔧
+            </span>
             {profile?.nombre_taller || "Mi taller"}
           </Link>
-          <form action={logout}>
-            <button className="text-sm text-gray-500 hover:text-gray-900">
-              Cerrar sesión
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            <span className="hidden h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600 sm:flex">
+              {inicial}
+            </span>
+            <form action={logout}>
+              <button className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900">
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>

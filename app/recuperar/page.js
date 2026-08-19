@@ -3,21 +3,26 @@ import RecuperarForm from "./recuperar-form";
 
 export default function RecuperarPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Recuperar contraseña</h1>
-          <p className="mt-1 text-sm text-gray-500">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-lg">
+            🔧
+          </span>
+          <h1 className="font-display text-2xl font-semibold text-slate-900">
+            Recuperar contraseña
+          </h1>
+          <p className="text-sm text-slate-500">
             Te enviaremos un enlace a tu email para poner una contraseña nueva.
           </p>
         </div>
 
-        <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50">
           <RecuperarForm />
         </section>
 
-        <p className="text-center text-sm text-gray-500">
-          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-800">
+        <p className="text-center text-sm text-slate-500">
+          <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">
             Volver al login
           </Link>
         </p>
