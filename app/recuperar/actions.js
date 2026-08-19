@@ -21,6 +21,16 @@ export async function solicitarRecuperacion(formData) {
   console.log("DEBUG host header:", JSON.stringify(headerList.get("host")));
   console.log("DEBUG proto header:", JSON.stringify(headerList.get("x-forwarded-proto")));
   console.log("DEBUG NEXT_PUBLIC_SITE_URL:", JSON.stringify(process.env.NEXT_PUBLIC_SITE_URL));
+  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+  console.log("DEBUG anon key length:", rawKey.length);
+  console.log("DEBUG anon key char at 15:", rawKey.charCodeAt(15), JSON.stringify(rawKey[15]));
+  console.log("DEBUG anon key first 20:", JSON.stringify(rawKey.slice(0, 20)));
+  console.log("DEBUG anon key last 10:", JSON.stringify(rawKey.slice(-10)));
+  for (let i = 0; i < rawKey.length; i++) {
+    if (rawKey.charCodeAt(i) > 255) {
+      console.log("DEBUG BAD CHAR at index", i, "code", rawKey.charCodeAt(i));
+    }
+  }
 
   let result;
   try {
